@@ -1,6 +1,6 @@
 as86 -o bs.o  bs.s
-bcc -c -ansi  t.c
+bcc -c -ansi  t.c -m32
 ld86 -d bs.o t.o /usr/lib/bcc/libc.a
 
 dd if=a.out of=mtximage bs=1024 count=1 conv=notrunc
-qemu-system-x86_64 -fda mtximage -no-fd-bootchk
+qemu-system-i386 -fda mtximage -no-fd-bootchk
