@@ -1,4 +1,3 @@
-6-1. Given: The following bs.s file in BCC's assembly
 
 !==================== bs.s file ===================================
         .globl _main             ! IMPORT symbols from C code
