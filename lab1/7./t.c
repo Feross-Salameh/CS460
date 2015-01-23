@@ -17,17 +17,49 @@ u16 getblk(u16 blk, char buf[ ])
 {
 	u16 block = blk;
 	u16 cylinder = 0, head = 0, sector = 0;
-	//cylinder = block % 5;
-	//uh = (b % 36) / 2;
-	//c = (blk / 36);
+	sector = block % 18;
+	head = (block % 36) / 2;
+	cylinder = (block / 36);
+	prints("\nblk: "); putc(blk + '0');
+	prints("\nsector: "); putc(sector + '0');
+	prints("\nhead: "); putc(head + '0');
+	prints("\ncylinder: "); putc(cylinder + '0');
+	readfd(cylinder, head, sector, buf);
 }
 
+u16 printDIR(INODE *ipt, char buf[])
+{
+	int i = 0; 
+	char *cp; 
+	DIR *dp;
+	prints("Set Vars...\n");
+	for ( i = 0; i < 12; i++)
+	{
+		int blk = ipt->i_block[i];
+		// cycle through...
+		if(blk <= 0)
+			return;
+		prints("get block number:"); putc(blk + '0'); prints("\n");
+		prints("getting new block\n");
+		getblk(blk, buf);
+		prints(" setting correct variables\n");
+		cp = buf;
+		dp = (DIR *)buf;
+		while(cp < buf + 1024)
+		{
+			
+			prints(dp->name);
+			prints(" ");
+			cp = dp + dp->rec_len;
+			dp = cp;
+			
+		}
+		
+	}
+	
+	
+}
 
-
-
-GD    *gp;
-INODE *ip;
-DIR   *dp;
 
 main()
 { 
@@ -41,7 +73,7 @@ main()
   gp = (GD *)buf1;
   iblk = (u16)gp->bg_inode_table; // typecast u32 to u16
 
-  prints("inode_block="); putc(iblk+'0'); getc();
+  prints("inode_block= "); putc(iblk+'0'); //getc();
   /******** write C code to do these: ********************
   (1).read first inode block into buf1[ ]
 
@@ -53,5 +85,10 @@ main()
   
   (4).prints("\n\rAll done\n\r");
   ******************************************************/
+  getblk((u16)iblk, buf1);
+  ip = (INODE *)buf1 + 1; 
+  printDIR(ip, buf2);
+  
+  
   
 }  
