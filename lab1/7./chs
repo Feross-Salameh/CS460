@@ -8,7 +8,3 @@ dd if=a.out of=mtximage bs=1024 count=1 conv=notrunc
 
 echo starting qemu
 qemu-system-x86_64 -fda mtximage -no-fd-bootchk
-
-
-echo removing .o files
-rm *.o
