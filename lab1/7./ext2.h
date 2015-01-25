@@ -42,7 +42,8 @@ struct ext2_group_desc
 	u32	bg_reserved[3];
 };
 
-struct ext2_dir_entry_2 {
+struct ext2_dir_entry_2 
+{
 	u32	inode;			/* Inode number */
 	u16	rec_len;		/* Directory entry length */
 	u8	name_len;		/* Name length */
