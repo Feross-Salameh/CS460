@@ -16,53 +16,40 @@ int prints(char *s)
 u16 getblk(u16 blk, char buf[ ])
 {
 	
-	u16 block = blk;
-	u16 cylinder = 0, head = 0, sector = 0;
-	sector = ((block % 18) % 9) * 2;
-	head = ((block % 19) / 9;
-	cylinder = (block / 18);
-	prints("getblk:\n");
-	prints("  blk: "); putc(blk + '0');
-	prints("\n  sector: "); putc(sector + '0');
-	prints("\n  head: "); putc(head + '0');
-	prints("\n  cylinder: "); putc(cylinder + '0');
-	prints("\n");
-	readfd(cylinder, head, sector, buf);
+	//u16 cylinder = 0, head = 0, sector = 0;
+	//sector = ((block % 18) % 9) * 2;
+	//head = (block % 19) / 9;
+	//cylinder = (block / 18);
+	//readfd(cylinder, head, sector, buf);
+	readfd(blk/18, ((blk)%18)/9, (((blk)%18)%9)*2, buf);
 }
 
-u16 printDIR(INODE *ipt, char buf[])
+u16 printDIR(char buf[])
 {
 	int i = 0; 
 	char *cp; 
-	DIR *dp;
-	int blk = 0;
+	int tblk = 0;
 	prints("In printDIR\n");
-	for ( i = 0; i < 12; i++)
-	{
+	//for ( i = 0; i < 12; i++)
+	//{
 		prints("in loop\n");
-		blk = ipt->i_block[i];
-		// cycle through...
-		if(blk <= 0)
-		{
-			prints("Block less than 0, returning...\n");
-			return;
-		}
+		tblk = ip->i_block[0];
+
 		prints("getting new block\n");
-		//getblk(blk, buf);
-		//prints(" setting correct variables\n");
-		//cp = buf;
-		//dp = (DIR *)buf;
-		//while(cp < buf + 1024)
-		//{
+		getblk((u16)tblk, buf);
+		cp = buf;
+		dp = (DIR *)buf;
+		while(cp < buf + 1024)
+		{
 			
-			//prints(dp->name);
-			//prints(" ");
-			//cp = dp + dp->rec_len;
-			//dp = cp;
+			prints(dp->name);
+			prints(" ");
+			cp = dp + dp->rec_len;
+			dp = cp;
 			
-		//}
+		}
 		
-	}
+	//}
 	
 	
 }
@@ -80,7 +67,7 @@ main()
   gp = (GD *)buf1;
   iblk = (u16)gp->bg_inode_table; // typecast u32 to u16
 
-  prints("inode_block= "); putc(iblk+'0'); getc();
+  prints("inode_block= "); putc(iblk+'0');// getc();
   prints("\n");
   /******** write C code to do these: ********************
   (1).read first inode block into buf1[ ]
@@ -93,11 +80,12 @@ main()
   
   (4).prints("\n\rAll done\n\r");
   ******************************************************/
-  prints("second get block\n");
+  prints("getting root inode.\n");
   getblk((u16)iblk, buf1);
   ip = (INODE *)buf1 + 1; 
-  printDIR(ip, buf2);
-  
+  //printDIR(buf2);
+   getblk((u16)ip->i_block[0], buf2);
+  prints("past getblk\n");
   
   
 }  
