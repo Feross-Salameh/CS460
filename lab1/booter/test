@@ -1,7 +1,8 @@
-echo building...
+echo compiling...
 as86 -o bs.o  bs.s
-bcc -c -ansi  t.c
-ld86 -d bs.o t.o /usr/lib/bcc/libc.a
+bcc -c -ansi  main.c
+echo linking 
+ld86 -d bs.o main.o /usr/lib/bcc/libc.a
 
 echo copying mtxover
 cp "/home/feross/Downloads/mtximage(1)" mtximage
