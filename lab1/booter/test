@@ -6,7 +6,7 @@ ld86 -d bs.o main.o /usr/lib/bcc/libc.a
 
 echo copying mtxover
 cp "/home/feross/Downloads/mtximage(1)" mtximage
-
+ls -l a.out
 echo dumping a.out into virtual disk
 dd if=a.out of=mtximage bs=1024 count=1 conv=notrunc
 

@@ -56,5 +56,6 @@ struct ext2_dir_entry_2
 GD    *gp;
 INODE *ip;
 DIR   *dp;
-
+int inodeStart;
+u32 *ptr;
 #endif
