@@ -1,0 +1,26 @@
+echo compiling...
+as86 -o bs.o  bs.s
+bcc -c -ansi  main.c
+echo linking 
+ld86 -d bs.o main.o /usr/lib/bcc/libc.a
+
+echo copying mtxover
+cp "mtximage(org)" mtximage
+
+
+echo cp a.out to mtximage/boot/mtx
+   mount -o loop mtximage /mnt
+   cp a.out /mnt/boot/mtx
+   umount /mnt
+echo done
+
+# old insert into mtximage.
+# echo dumping a.out into virtual disk
+# dd if=a.out of=mtximage bs=1024 count=1 conv=notrunc
+
+echo starting qemu
+qemu-system-x86_64 -fda mtximage -no-fd-bootchk
+
+echo cleaning files
+rm *.o 
+rm *.out
