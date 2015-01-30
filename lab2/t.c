@@ -4,19 +4,31 @@
 
 #define DEAD      0                /* proc status     */
 #define READY     1      
+#define FREE      2               
+#define SLEEP     3 
+#define BLOCK     4                
+#define ZOMBIE    5                
 
-typedef struct proc{
-    struct proc *next;   
-           int  ksp;               /* saved sp; offset = 2 */
-           int  pid;
-           int  status;            /* READY|DEAD, etc */
-           int  kstack[SSIZE];     // kmode stack of task
+typedef struct proccess
+{
+	struct proccess *next;
+	int    ksp;
+
+	int    status;       // FREE|READY|SLEEP|BLOCK|ZOMBIE
+	int    priority;     // priority
+	int    pid;          // process pid
+	int    ppid;         // parent pid 
+	struct proccess *parent; // pointer to parent PROC
+
+	int    kstack[SSIZE]; // SSIZE=1024
 }PROC;
 
 
-// #include "io.c" /**** USE YOUR OWN io.c with YOUR printf() here *****/
+// #include "i	o.c" /**** USE YOUR OWN io.c with YOUR printf() here *****/
 
-PROC proc[NPROC], *running;
+PROC proc[NPROC], *running, *freeList, *readyQueue;
+
+
 
 int  procSize = sizeof(PROC);
 
@@ -42,7 +54,12 @@ int initialize()
     p = &proc[i];
     p->next = &proc[i+1];
     p->pid = i;
-    p->status = READY;
+    p->status = FREE;
+    p->priority = 0;
+    p->ppid = 0;
+    p->parent = 0;
+    
+    
     
     if (i){     // initialize kstack[ ] of proc[1] to proc[N-1]
       for (j=1; j < 10; j++)
