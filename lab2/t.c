@@ -24,7 +24,7 @@ typedef struct proccess
 }PROC;
 
 
-// #include "i	o.c" /**** USE YOUR OWN io.c with YOUR printf() here *****/
+// #include "io.c" /**** USE YOUR OWN io.c with YOUR printf() here *****/
 
 PROC proc[NPROC], *running, *freeList, *readyQueue;
 
@@ -42,6 +42,29 @@ int  procSize = sizeof(PROC);
  Each proc's kstack contains:
       retPC, ax, bx, cx, dx, bp, si, di, flag;  all 2 bytes
 *****************************************************************/
+PROC *get_proc()
+{
+	PROC *ret = &freeList[0];
+	
+	freeList = &freeList[1];
+	
+	return ret;
+}
+
+put_proc(PROC *p)
+{
+	PROC *ptr;
+	if(!freeList)
+	{
+		freeList = p;
+		return;
+	}
+	ptr = freeList;
+	while(ptr->next)
+		ptr = ptr->next;
+	ptr->next = p;	
+}
+
 
 int body();  
 
@@ -50,7 +73,8 @@ int initialize()
   int i, j;
   PROC *p;
 
-  for (i=0; i < NPROC; i++){
+  for (i=0; i < NPROC; i++)
+  {
     p = &proc[i];
     p->next = &proc[i+1];
     p->pid = i;
@@ -60,16 +84,19 @@ int initialize()
     p->parent = 0;
     
     
-    
-    if (i){     // initialize kstack[ ] of proc[1] to proc[N-1]
+    if (i)
+    {     // initialize kstack[ ] of proc[1] to proc[N-1]
       for (j=1; j < 10; j++)
           p->kstack[SSIZE - j] = 0;          // all saved registers = 0
       p->kstack[SSIZE-1]=(int)body;          // called tswitch() from body
       p->ksp = &(p->kstack[SSIZE-9]);        // ksp -> kstack top
     }
+    
   }
-  running = &proc[0];
-  proc[NPROC-1].next = &proc[0];
+  running = proc;
+  running->status = READY;
+  running->parent = &proc[0];
+  proc[NPROC -1].next = &proc[0];
   printf("initialization complete\n"); 
 }
 
@@ -77,7 +104,8 @@ int body()
 {
    char c;
    printf("proc % resumes to body() function\n");
-   while(1){
+   while(1)
+   {
       printf("I am Proc %d in body(): Enter a key :  ", running->pid);
       c=getc();
       printf("%c\n", c);
@@ -90,7 +118,9 @@ main()
    char c;
    printf("\nWelcome to the 460 Multitasking System\n");
    initialize();
-   while(1){
+   while(1)
+   {
+	 printf("begining of loop\n");
      printf("proc %d running : enter a key : ", running->pid);
      c = getc();
      printf("%c\n", c); 
