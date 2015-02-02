@@ -42,13 +42,64 @@ int  procSize = sizeof(PROC);
  Each proc's kstack contains:
       retPC, ax, bx, cx, dx, bp, si, di, flag;  all 2 bytes
 *****************************************************************/
-PROC *get_proc()
+// part 4.
+enqueue(PROC **queue, PROC *p)
 {
-	PROC *ret = &freeList[0];
+	// Since queue is more like a stack,
+	// will need to add p to beginning of queue
+	p->next = *queue;
+	*queue = p;
+}
+
+PROC *dequeue(PROC **queue)
+{
 	
-	freeList = &freeList[1];
+	// need to grab first object into queue
+	PROC *ret;
+	
+	ret = *queue;
+	
+	*queue = (*queue)->next;
+	
+	ret->next = 0;
 	
 	return ret;
+	
+}
+
+printQueue(PROC *queue)
+{
+	PROC *temp = queue;
+	if(!temp)
+	{
+		printf("Nothing in queue\n");
+		return;
+	}
+	printf("[%d, %d]", temp->pid, temp->priority);
+	temp = temp->next;
+	while(!temp)
+	{
+		printf("->[%d, %d]", temp->pid, temp->priority);
+		temp = temp->next;
+	}
+	printf("\n");
+	
+}
+
+
+
+// part 3.
+PROC *get_proc()
+{
+	PROC * ret; 
+	
+	if(!freeList)
+		return 0;
+		
+	ret = freeList;
+	freeList = freeList->next;
+	ret->next = 0;
+	return ret; 
 }
 
 put_proc(PROC *p)

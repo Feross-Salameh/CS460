@@ -7,9 +7,9 @@ echo linking
 echo copying mtxover
 cp "mtximage(org)" mtximage
 
-# old insert into mtximage.
-# echo dumping booter.out into virtual disk
-# dd if=booter.out of=mtximage bs=1024 count=1 conv=notrunc
+old insert into mtximage.
+echo dumping booter.out into virtual disk
+dd if=booter.out of=mtximage bs=1024 count=1 conv=notrunc
 
 echo cp a.out to mtximage/boot/mtx
    sudo mount -o loop mtximage /mnt
