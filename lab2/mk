@@ -7,7 +7,7 @@ echo linking
 echo copying mtxover
 cp "mtximage(org)" mtximage
 
-old insert into mtximage.
+# old insert into mtximage.
 echo dumping booter.out into virtual disk
 dd if=booter.out of=mtximage bs=1024 count=1 conv=notrunc
 
