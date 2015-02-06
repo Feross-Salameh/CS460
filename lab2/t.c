@@ -42,13 +42,33 @@ int  procSize = sizeof(PROC);
  Each proc's kstack contains:
       retPC, ax, bx, cx, dx, bp, si, di, flag;  all 2 bytes
 *****************************************************************/
+
 // part 4.
 enqueue(PROC **queue, PROC *p)
 {
-	// Since queue is more like a stack,
-	// will need to add p to beginning of queue
-	p->next = *queue;
-	*queue = p;
+	
+	if(!*queue)
+	{
+		*queue = p;
+		return; 
+	}
+	// search for correct place...
+	while(!(*queue)->next)
+	{
+		if(p->priority >= (*queue)->priority)
+			break;
+		else
+		{
+			p->next = *queue;
+			queue = &p;
+			return;
+		}
+	}
+	
+	// end of queue...
+	(*queue)->next = p;
+	return;
+	
 }
 
 PROC *dequeue(PROC **queue)
@@ -116,6 +136,19 @@ put_proc(PROC *p)
 	ptr->next = p;	
 }
 
+// part 5 
+PROC *kfork()
+{
+	PROC *p = get_proc();
+	
+	p->status = READY;
+	p->priority = 1;
+	p->ppid = running->pid;
+	p->parent = running;
+	
+	return p;
+}
+
 
 int body();  
 
@@ -156,8 +189,8 @@ int body()
    char c;
    printf("proc % resumes to body() function\n");
    while(1)
-   {
-      printf("I am Proc %d in body(): Enter a key :  ", running->pid);
+   face{
+      printf("I am Proc %d in body(): CMD[s|q|f]:  ", running->pid);
       c=getc();
       printf("%c\n", c);
       tswitch();
