@@ -204,7 +204,6 @@ main()
    initialize();
    while(1)
    {
-	 printf("begining of loop\n");
      printf("proc %d running : enter a key : ", running->pid);
      c = getc();
      printf("%c\n", c); 
