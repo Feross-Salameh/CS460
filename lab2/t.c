@@ -112,10 +112,8 @@ printQueue(PROC *queue)
 PROC *get_proc()
 {
 	PROC * ret; 
-	
 	if(!freeList)
 		return 0;
-		
 	ret = freeList;
 	freeList = freeList->next;
 	ret->next = 0;
@@ -140,15 +138,23 @@ put_proc(PROC *p)
 PROC *kfork()
 {
 	PROC *p = get_proc();
-	
+	if(!p)
+		return 0;
 	p->status = READY;
 	p->priority = 1;
 	p->ppid = running->pid;
 	p->parent = running;
-	
 	return p;
 }
 
+kexit()
+{
+	printf("kexit(): entered \n");
+	running->status = ZOMBIE;
+	printf("kexit(): running is now zombie\n");
+	tswitch();
+	printf("kexit(): past tswitch\n");
+}
 
 int body();  
 
@@ -177,24 +183,47 @@ int initialize()
     }
     
   }
+  freeList = &proc[0];
+  p = freeList;
+  for (i=1; i < NPROC; i++)
+  {
+	  p->next = &proc[i];
+	  p = p->next;
+  }
   running = proc;
   running->status = READY;
   running->parent = &proc[0];
-  proc[NPROC -1].next = &proc[0];
+  proc[NPROC-1].next = &proc[0];
   printf("initialization complete\n"); 
 }
 
 int body()
 {
-   char c;
-   printf("proc % resumes to body() function\n");
-   while(1)
-   face{
-      printf("I am Proc %d in body(): CMD[s|q|f]:  ", running->pid);
-      c=getc();
-      printf("%c\n", c);
-      tswitch();
-   }
+	char c;
+	printf("proc % resumes to body() function\n");
+	while(1)
+	{
+		printf("I am Proc %d in body(): CMD[s|q|f]:  ", running->pid);
+		c=getc();
+		printf("%c\n", c);
+		switch(c)
+		{
+		case 's':
+			tswitch();
+			break;
+		case 'q':
+			kexit();
+			break;
+		case 'f':
+			if(kfork())
+				printf("kfork was successful\n");
+			else
+				printf("kfork failed\n");
+			break;
+		default:
+			printf("invalid command\n");
+		}
+	}
 }
 
 main()
@@ -203,16 +232,34 @@ main()
    printf("\nWelcome to the 460 Multitasking System\n");
    initialize();
    while(1)
-   {
-     printf("proc %d running : enter a key : ", running->pid);
-     c = getc();
-     printf("%c\n", c); 
-     tswitch();
-   }
+	{
+		printf("I am Proc %d in main(): CMD[s|q|f]:  ", running->pid);
+		c=getc();
+		printf("%c\n", c);
+		switch(c)
+		{
+		case 's':
+			tswitch();
+			break;
+		case 'q':
+			kexit();
+			break;
+		case 'f':
+			if(kfork())
+				printf("kfork was successful\n");
+			else
+				printf("kfork failed\n");
+			break;
+		default:
+			printf("invalid command\n");
+		}
+	}
 }
 
 int scheduler()
 {
-    running = running->next;
+    if (running->status == READY)
+          enqueue(&readyQueue, running);
+       running = dequeue(&readyQueue);
 }
 
