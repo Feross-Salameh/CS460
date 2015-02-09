@@ -11,14 +11,14 @@
 
 typedef struct proccess
 {
-	struct proccess *next;
+	struct proc *next;
 	int    ksp;
 
 	int    status;       // FREE|READY|SLEEP|BLOCK|ZOMBIE
 	int    priority;     // priority
 	int    pid;          // process pid
 	int    ppid;         // parent pid 
-	struct proccess *parent; // pointer to parent PROC
+	struct proc *parent; // pointer to parent PROC
 
 	int    kstack[SSIZE]; // SSIZE=1024
 }PROC;
@@ -32,41 +32,36 @@ PROC proc[NPROC], *running, *freeList, *readyQueue;
 
 int  procSize = sizeof(PROC);
 
-/****************************************************************
- Initialize the proc's as shown:
-
- running->proc[0]--> proc[1] --> proc[2] ... --> proc[NPROC-1] -->
-                       ^                                         |
-            |<---------------------------------------<------------
-
- Each proc's kstack contains:
-      retPC, ax, bx, cx, dx, bp, si, di, flag;  all 2 bytes
-*****************************************************************/
-
 // part 4.
 enqueue(PROC **queue, PROC *p)
 {
-	
+	printf("enqueue(): Entered\n");
 	if(!*queue)
 	{
+		printf("enqueue(): queue empty, p is now queue\n");
 		*queue = p;
 		return; 
 	}
-	// search for correct place...
-	while(!(*queue)->next)
+	
+	while((*queue)->next != 0)
 	{
-		if(p->priority >= (*queue)->priority)
-			break;
-		else
+		printf("enqueue(): in while loop current process is %d\n", (*queue)->pid);
+		if((*queue)->priority >= p->priority)
 		{
-			p->next = *queue;
+			printf("enqueue(): queueing process\n");
+			p->next = (*queue);
 			queue = &p;
+			printf("enqueue():queue is now:", (*queue)->pid);
+			printQueue(*queue);
 			return;
 		}
+		printf("enqueue(): moving to next process\n");
+		(*queue) = (*queue)->next;
 	}
 	
-	// end of queue...
 	(*queue)->next = p;
+	printf("enqueue(): inserting process %d in last of queue\n",(*queue)->next->pid );
+	// end of queue...
 	return;
 	
 }
@@ -95,11 +90,11 @@ printQueue(PROC *queue)
 		printf("Nothing in queue\n");
 		return;
 	}
-	printf("[%d, %d]", temp->pid, temp->priority);
+	printf("[%d,%d]", temp->pid, temp->priority);
 	temp = temp->next;
-	while(!temp)
+	while(temp != 0)
 	{
-		printf("->[%d, %d]", temp->pid, temp->priority);
+		printf("->[%d,%d]", temp->pid, temp->priority);
 		temp = temp->next;
 	}
 	printf("\n");
@@ -140,10 +135,12 @@ PROC *kfork()
 	PROC *p = get_proc();
 	if(!p)
 		return 0;
+	printf("kfork(): recieved process %d\n", p->pid);
 	p->status = READY;
 	p->priority = 1;
 	p->ppid = running->pid;
 	p->parent = running;
+	enqueue(&readyQueue, p);
 	return p;
 }
 
@@ -156,45 +153,48 @@ kexit()
 	printf("kexit(): past tswitch\n");
 }
 
+printLists()
+{
+	printf("-------------------------Process'--------------------------\n");
+	printf("FreeList: "); printQueue(freeList);
+	printf("ReadyQueue: ");printQueue(readyQueue);
+	printf("-----------------------------------------------------------\n");
+}
+
 int body();  
 
 int initialize()
 {
-  int i, j;
-  PROC *p;
-
-  for (i=0; i < NPROC; i++)
-  {
-    p = &proc[i];
-    p->next = &proc[i+1];
-    p->pid = i;
-    p->status = FREE;
-    p->priority = 0;
-    p->ppid = 0;
-    p->parent = 0;
-    
-    
-    if (i)
-    {     // initialize kstack[ ] of proc[1] to proc[N-1]
-      for (j=1; j < 10; j++)
-          p->kstack[SSIZE - j] = 0;          // all saved registers = 0
-      p->kstack[SSIZE-1]=(int)body;          // called tswitch() from body
-      p->ksp = &(p->kstack[SSIZE-9]);        // ksp -> kstack top
-    }
-    
-  }
-  freeList = &proc[0];
-  p = freeList;
-  for (i=1; i < NPROC; i++)
-  {
-	  p->next = &proc[i];
-	  p = p->next;
-  }
-  running = proc;
-  running->status = READY;
-  running->parent = &proc[0];
-  proc[NPROC-1].next = &proc[0];
-  printf("initialization complete\n"); 
+	int i, j;
+	PROC *p, *temp;
+	for (i=0; i < NPROC; i++)
+	{
+		p = &proc[i];
+		p->next = 0;
+		p->pid = i;
+		p->status = FREE;
+		p->priority = 0;
+		p->ppid = 0;
+		p->parent = 0;
+		p->next = 0;
+		if (i)
+		{     // initialize kstack[ ] of proc[1] to proc[N-1]
+			for (j=1; j < 10; j++)
+				p->kstack[SSIZE - j] = 0;          // all saved registers = 0
+			p->kstack[SSIZE-1]=(int)body;          // called tswitch() from body
+			p->ksp = &(p->kstack[SSIZE-9]);        // ksp -> kstack top
+		}
+	}
+	running = &proc[0];
+	running->status = READY;
+	running->parent = &proc[0];
+	freeList = &proc[1];
+	for(i = 2; i < NPROC; i++)
+	{
+		proc[i-1].next = &proc[i];
+	}
+	
+	readyQueue = 0;
 }
 
 int body()
@@ -203,12 +203,14 @@ int body()
 	printf("proc % resumes to body() function\n");
 	while(1)
 	{
+		printLists();
 		printf("I am Proc %d in body(): CMD[s|q|f]:  ", running->pid);
 		c=getc();
 		printf("%c\n", c);
 		switch(c)
 		{
 		case 's':
+			printf("Calling tswitch\n");
 			tswitch();
 			break;
 		case 'q':
@@ -233,12 +235,14 @@ main()
    initialize();
    while(1)
 	{
-		printf("I am Proc %d in main(): CMD[s|q|f]:  ", running->pid);
+		printLists();
+		printf("I am Proc %din main(), CMD[s|q|f]:  ", running->pid);
 		c=getc();
 		printf("%c\n", c);
 		switch(c)
 		{
 		case 's':
+			printf("Calling tswitch\n");
 			tswitch();
 			break;
 		case 'q':
