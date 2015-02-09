@@ -16,7 +16,7 @@ start:
 dead:	jmp dead                        ! loop if main() ever returns
 
 	
-_do_tswitch:
+_tswitch:
 SAVE:	push ax
         push bx
 	push cx

@@ -1,3 +1,5 @@
+#include "header.h"
+
 enqueue(PROC **queue, PROC *p)
 {
 	printf("enqueue(): Entered\n");

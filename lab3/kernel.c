@@ -1,4 +1,4 @@
-// part 3.
+
 PROC *get_proc()
 {
 	PROC * ret; 
@@ -9,6 +9,7 @@ PROC *get_proc()
 	ret->next = 0;
 	return ret; 
 }
+#include "header.h"
 
 put_proc(PROC *p)
 {
@@ -24,7 +25,6 @@ put_proc(PROC *p)
 	ptr->next = p;	
 }
 
-// part 5 
 PROC *do_kfork()
 {
 	PROC *p = get_proc();
