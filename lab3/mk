@@ -1,8 +1,8 @@
 echo compiling
    as86 -o  ts.o  ts.s
-   bcc  -c -ansi  t.c queue.c kernel.c
+   bcc  -c -ansi  t.c
 echo linking
-   ld86 -d ts.o *.o mtxlib /usr/lib/bcc/libc.a
+   ld86 -d ts.o t.o mtxlib /usr/lib/bcc/libc.a
 
 echo copying mtxover
 cp "mtximage(org)" mtximage

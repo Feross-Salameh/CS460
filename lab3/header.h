@@ -30,10 +30,4 @@ int procSize = sizeof(PROC);
 int nproc = 0;
 int color;
 
-#include "queue.c"
-//#include "wait.c"
-#include "kernel.c"
-#include "t.c"
-
-
 #endif
