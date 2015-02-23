@@ -8,6 +8,7 @@ int color;
 int body();
 char *pname[]={"Sun", "Mercury", "Venus", "Earth",  "Mars", "Jupiter", 
                "Saturn", "Uranus", "Neptune" };
+//#include "queue.c"
 
 #include "int.c"
 
@@ -20,7 +21,7 @@ PROC *kfork(char *filename)
   PROC *p;
   int  i, child;
   u16  segment;
-
+  printf("kfork called\n");
   /*** get a PROC for child process: ***/
   if ( (p = get_proc(&freeList)) == 0){
        printf("no more proc\n");
@@ -61,7 +62,10 @@ PROC *kfork(char *filename)
          put_word(0, segment, -2*i);
      }
      
-     put_word(0x0200,  segment, -2*1);   /* flag */  
+     put_word(0x0200,   segment, -2*1);   /* flag */  
+     put_word(segment,  segment, -2*2);   /* uCS */  
+     put_word(segment,  segment, -2*11);  /* uES */  
+     put_word(segment,  segment, -2*12);  /* uDS */  
 
      // YOU WRITE CODE TO FILL IN uDS, uES, uCS
 
@@ -88,16 +92,17 @@ int init()
         strcpy(proc[i].name, pname[i]);
    
         p->next = &proc[i+1];
-    }
+    }     
     freeList = &proc[0];      // all procs are in freeList
     proc[NPROC-1].next = 0;
     readyQueue = sleepList = 0;
 
     /**** create P0 as running ******/
     p = get_proc(&freeList);
-    p->status = RUNNING;
+    p->status = READY;
     p->ppid   = 0;
     p->parent = p;
+    
     running = p;
     nproc = 1;
     printf("done\n");
@@ -113,7 +118,7 @@ int scheduler()
 
 int int80h();
 
-int set_vec(vector, handler) u16 vector, handler;
+int set_vec(u16 vector, u16 handler)
 {
      // put_word(word, segment, offset) in mtxlib
      put_word(handler, 0, vector<<2);
