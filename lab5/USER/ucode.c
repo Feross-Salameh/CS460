@@ -1,14 +1,14 @@
 // ucode.c file
 
-char *cmd[]={"getpid", "ps", "chname", "kfork", "switch", "wait", "exit", 0};
+char *cmd[]={"getpid", "ps", "chname", "kfork", "switch", "wait", "exit", "fork", 0};
 
 #define LEN 64
 
 int show_menu()
 {
-   printf("***************** Menu *******************\n");
-   printf("*  ps  chname  kfork  switch  wait  exit *\n");
-   printf("******************************************\n");
+   printf("***************** Menu ************************\n");
+   printf("*  ps  chname  kfork  switch  wait  exit fork *\n");
+   printf("***********************************************\n");
 }
 
 int find_cmd(char *name)
@@ -82,6 +82,15 @@ int exit()
    printf("exitvalue=%d\n", exitValue);
    printf("enter kernel to die with exitValue=%d\n", exitValue);
    _exit(exitValue);
+}
+
+int ufork()
+{
+  int child, pid;
+  pid = getpid();
+  printf("proc %d enter kernel to kfork a child\n", pid); 
+  child = syscall(7, 0, 0);
+  printf("proc %d forked a child %d\n", pid, child);
 }
 
 int _exit(int exitValue)

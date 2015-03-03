@@ -6,6 +6,8 @@ int nproc = 0;
 int color;
 
 int body();
+int goUmode();
+PROC *kufork(char *filename);
 char *pname[]={"Sun", "Mercury", "Venus", "Earth",  "Mars", "Jupiter", 
                "Saturn", "Uranus", "Neptune" };
 //#include "queue.c"
@@ -16,7 +18,7 @@ char *pname[]={"Sun", "Mercury", "Venus", "Earth",  "Mars", "Jupiter",
   kfork() creates a child proc and returns the child pid.
   When scheduled to run, the child process resumes to body();
 ************************************************************/
-PROC *kfork_old(char *filename)
+PROC *kfork(char *filename)
 {
   PROC *p;
   int  i, child;
@@ -81,8 +83,8 @@ PROC *kfork_old(char *filename)
 
 copy_image(u16 child_segment)
 {
-	u16 count = 0, temp = 0;
-	u16 parent_segment = running->usp;
+	u32 count = 0;
+	u16 parent_segment = running->usp, temp = 0;
 	printf("copy_image() called\n");
 	for(count = 0; count < 0x1000; count++)
 	{
@@ -92,7 +94,7 @@ copy_image(u16 child_segment)
 
 }
 
-PROC *kfork(char *filename)
+PROC *kufork(char *filename)
 {
 	PROC *p;
 	int  i, child;
@@ -109,34 +111,31 @@ PROC *kfork(char *filename)
 	p->ppid = running->pid;
 	p->parent = running;
 	p->priority  = 1;
-	
 	// clear all SAVed registers on kstack
 	for (i=1; i<10; i++)
 		p->kstack[SSIZE-i] = 0;
-
 	// fill in resume address
-	p->kstack[SSIZE-1] = (int)body;
+	p->kstack[SSIZE-1] = (int)goUmode;
 	// save stack TOP address in PROC
 	p->ksp = &(p->kstack[SSIZE - 9]);
-
 	enqueue(&readyQueue, p);
 	nproc++;
 	if(filename)
 	{
 		child_segment = 0x1000*(p->pid+1);  // new PROC's segment
 		load(filename, child_segment);      // load file to LOW END of segment	
-		
 		copy_image(child_segment);
-
-		put_word(0x0200,   child_segment, -2*1);   /* flag */
-		put_word(child_segment,  child_segment, -2*2);   /* uCS */  
-		put_word(child_segment,  child_segment, -2*11);  /* uES */  
-		put_word(child_segment,  child_segment, -2*12);  /* uDS */  
 		p->uss = child_segment;
 		p->usp = running->usp;
+		
+		//put_word(running->uss + 0x0200,   child_segment, -2*1);   /* flag */
+		//put_word(child_segment,  child_segment, -2*2);   /* uCS */  
+		//put_word(child_segment,  child_segment, -2*11);  /* uES */  
+		//put_word(child_segment,  child_segment, -2*12);  /* uDS */  
+
 	}  
 	
-	printf("Proc %d kforked a child %d at segment=%x\n",
+	printf("Proc %d forked a child %d at segment=%x\n",
 		running->pid, p->pid, child_segment);
 	return p;
 }

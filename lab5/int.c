@@ -33,6 +33,7 @@ int kcinth()
        case 4 : r = ktswitch();       break;
        case 5 : r = kkwait(b);        break;
        case 6 : r = kkexit(b);        break;
+       case 7 : r = ufork();		  break;
 
    case 90: r = getc();               break;
    case 91: r = putc(b);              break;
@@ -114,6 +115,12 @@ int kps()
 int kkfork()
 {
   return do_kfork("/bin/u1");
+}
+
+int ufork()
+{
+	PROC * p = kufork("/bin/u1");
+	return p->pid;
 }
 
 int ktswitch()
