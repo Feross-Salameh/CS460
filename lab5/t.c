@@ -86,7 +86,7 @@ copy_image(u16 child_segment)
 	u32 count = 0;
 	u16 parent_segment = running->usp, temp = 0;
 	printf("copy_image() called\n");
-	for(count = 0; count < 0x1000; count++)
+	for(count = 0; count < 32768; count += 2)
 	{
 		temp =(u16)get_word(parent_segment, count);
 		put_word(temp, child_segment, count);
@@ -99,7 +99,7 @@ PROC *kufork(char *filename)
 	PROC *p;
 	int  i, child;
 	u16  child_segment;
-	printf("NEW kfork called\n");
+	printf("NEW fork called\n");
 	/*** get a PROC for child process: ***/
 	if ( (p = get_proc(&freeList)) == 0)
 	{
@@ -128,10 +128,16 @@ PROC *kufork(char *filename)
 		p->uss = child_segment;
 		p->usp = running->usp;
 		
-		//put_word(running->uss + 0x0200,   child_segment, -2*1);   /* flag */
-		//put_word(child_segment,  child_segment, -2*2);   /* uCS */  
-		//put_word(child_segment,  child_segment, -2*11);  /* uES */  
-		//put_word(child_segment,  child_segment, -2*12);  /* uDS */  
+		//for (i=1; i<=12; i++)
+		//{         // write 0's to ALL of them
+			//put_word(0, child_segment, -2*i);
+		//}
+     
+		
+		put_word(0x0200,   child_segment, -2*1);   /* flag */
+		put_word(child_segment,  child_segment, -2*2);   /* uCS */  
+		put_word(child_segment,  child_segment, -2*11);  /* uES */  
+		put_word(child_segment,  child_segment, -2*12);  /* uDS */  
 
 	}  
 	
