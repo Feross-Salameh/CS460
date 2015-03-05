@@ -88,7 +88,7 @@ int ufork()
 {
   int child, pid;
   pid = getpid();
-  printf("proc %d enter kernel to kfork a child\n", pid); 
+  printf("proc %d entered ufork\n", pid); 
   child = syscall(7, 0, 0);
   printf("proc %d forked a child %d\n", pid, child);
 }

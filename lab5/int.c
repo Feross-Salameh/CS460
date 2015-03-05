@@ -114,12 +114,13 @@ int kps()
 
 int kkfork()
 {
+	printf("kkfork called\n");
   return do_kfork("/bin/u1");
 }
 
 int ufork()
 {
-	PROC * p = kufork("/bin/u1");
+	PROC *p = kufork("/bin/u1");
 	return p->pid;
 }
 

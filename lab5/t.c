@@ -7,6 +7,7 @@ int color;
 
 int body();
 int goUmode();
+int int80h();
 PROC *kufork(char *filename);
 char *pname[]={"Sun", "Mercury", "Venus", "Earth",  "Mars", "Jupiter", 
                "Saturn", "Uranus", "Neptune" };
@@ -20,76 +21,76 @@ char *pname[]={"Sun", "Mercury", "Venus", "Earth",  "Mars", "Jupiter",
 ************************************************************/
 PROC *kfork(char *filename)
 {
-  PROC *p;
-  int  i, child;
-  u16  segment;
-  printf("kfork called\n");
-  /*** get a PROC for child process: ***/
-  if ( (p = get_proc(&freeList)) == 0){
-       printf("no more proc\n");
-       return(-1);
-  }
-  /* initialize the new proc and its stack */
-  p->status = READY;
-  p->ppid = running->pid;
-  p->parent = running;
-  p->priority  = 1;                 // all of the same priority 1
+	PROC *p;
+	int  i, child;
+	u16  segment;
+	printf("kfork called\n");
+	/*** get a PROC for child process: ***/
+	if ( (p = get_proc(&freeList)) == 0){
+	   printf("no more proc\n");
+	   return(-1);
+	}
+	/* initialize the new proc and its stack */
+	p->status = READY;
+	p->ppid = running->pid;
+	p->parent = running;
+	p->priority  = 1;                 // all of the same priority 1
 
-  // clear all SAVed registers on kstack
-  for (i=1; i<10; i++)
-      p->kstack[SSIZE-i] = 0;
- 
-  // fill in resume address
-  p->kstack[SSIZE-1] = (int)body;
-  // save stack TOP address in PROC
-  p->ksp = &(p->kstack[SSIZE - 9]);
+	// clear all SAVed registers on kstack
+	for (i=1; i<10; i++)
+	  p->kstack[SSIZE-i] = 0;
 
-  enqueue(&readyQueue, p);
+	// fill in resume address
+	p->kstack[SSIZE-1] = (int)body;
+	// save stack TOP address in PROC
+	p->ksp = &(p->kstack[SSIZE - 9]);
 
-  nproc++;
-  if (filename){
+	enqueue(&readyQueue, p);
 
-     segment = 0x1000*(p->pid+1);  // new PROC's segment
-     load(filename, segment);      // load file to LOW END of segment
+	nproc++;
+	if (filename){
 
-     /********** ustack contents at HIGH END of ustack[ ] ************
-        PROC.usp
-       -----|------------------------------------------------
-          |uDS|uES|udi|usi|ubp|udx|ucx|ubx|uax|uPC|uCS|flag|
-       -----------------------------------------------------
-           -12 -11 -10 -9  -8  -7  -6  -5  -4  -3  -2   -1
-     *****************************************************************/
+	 segment = 0x1000*(p->pid+1);  // new PROC's segment
+	 load(filename, segment);      // load file to LOW END of segment
 
-     for (i=1; i<=12; i++){         // write 0's to ALL of them
-         put_word(0, segment, -2*i);
-     }
-     
-     put_word(0x0200,   segment, -2*1);   /* flag */  
-     put_word(segment,  segment, -2*2);   /* uCS */  
-     put_word(segment,  segment, -2*11);  /* uES */  
-     put_word(segment,  segment, -2*12);  /* uDS */  
+	 /********** ustack contents at HIGH END of ustack[ ] ************
+		PROC.usp
+	   -----|------------------------------------------------
+		  |uDS|uES|udi|usi|ubp|udx|ucx|ubx|uax|uPC|uCS|flag|
+	   -----------------------------------------------------
+		   -12 -11 -10 -9  -8  -7  -6  -5  -4  -3  -2   -1
+	 *****************************************************************/
 
-     // YOU WRITE CODE TO FILL IN uDS, uES, uCS
+	 for (i=1; i<=12; i++){         // write 0's to ALL of them
+		 put_word(0, segment, -2*i);
+	 }
+	 
+	 put_word(0x0200,   segment, -2*1);   /* flag */  
+	 put_word(segment,  segment, -2*2);   /* uCS */  
+	 put_word(segment,  segment, -2*11);  /* uES */  
+	 put_word(segment,  segment, -2*12);  /* uDS */  
 
-     /* initial USP relative to USS */
-     p->usp = -2*12; 
-     p->uss = segment;
-  }
+	 // YOU WRITE CODE TO FILL IN uDS, uES, uCS
 
-  printf("Proc %d kforked a child %d at segment=%x\n",
-          running->pid, p->pid, segment);
-  return p;
+	 /* initial USP relative to USS */
+	 p->usp = -2*12; 
+	 p->uss = segment;
+	}
+
+	printf("Proc %d kforked a child %d at segment=%x\n",
+		  running->pid, p->pid, segment);
+	return p;
 }
 
 copy_image(u16 child_segment)
 {
-	u32 count = 0;
-	u16 parent_segment = running->usp, temp = 0;
-	printf("copy_image() called\n");
-	for(count = 0; count < 32768; count += 2)
-	{
-		temp =(u16)get_word(parent_segment, count);
-		put_word(temp, child_segment, count);
+	u16 offset = 0; 
+	int word;
+
+	for(offset = 0; offset < 0x1000; offset++)
+	{ 
+		word = get_word(running->uss, offset); 
+		put_word(word, child_segment, offset); 
 	}
 
 }
@@ -98,53 +99,64 @@ PROC *kufork(char *filename)
 {
 	PROC *p;
 	int  i, child;
-	u16  child_segment;
-	printf("NEW fork called\n");
+	u16  segment;
+	printf("kfork called\n");
 	/*** get a PROC for child process: ***/
-	if ( (p = get_proc(&freeList)) == 0)
-	{
-		printf("no more proc\n");
-		return(-1);
+	if ( (p = get_proc(&freeList)) == 0){
+	   printf("no more proc\n");
+	   return(-1);
 	}
 	/* initialize the new proc and its stack */
 	p->status = READY;
 	p->ppid = running->pid;
 	p->parent = running;
-	p->priority  = 1;
+	p->priority  = 1;                 // all of the same priority 1
+
 	// clear all SAVed registers on kstack
 	for (i=1; i<10; i++)
-		p->kstack[SSIZE-i] = 0;
+	  p->kstack[SSIZE-i] = 0;
+
 	// fill in resume address
 	p->kstack[SSIZE-1] = (int)goUmode;
 	// save stack TOP address in PROC
 	p->ksp = &(p->kstack[SSIZE - 9]);
-	enqueue(&readyQueue, p);
-	nproc++;
-	if(filename)
-	{
-		child_segment = 0x1000*(p->pid+1);  // new PROC's segment
-		load(filename, child_segment);      // load file to LOW END of segment	
-		copy_image(child_segment);
-		p->uss = child_segment;
-		p->usp = running->usp;
-		
-		//for (i=1; i<=12; i++)
-		//{         // write 0's to ALL of them
-			//put_word(0, child_segment, -2*i);
-		//}
-     
-		
-		put_word(0x0200,   child_segment, -2*1);   /* flag */
-		put_word(child_segment,  child_segment, -2*2);   /* uCS */  
-		put_word(child_segment,  child_segment, -2*11);  /* uES */  
-		put_word(child_segment,  child_segment, -2*12);  /* uDS */  
 
-	}  
-	
-	printf("Proc %d forked a child %d at segment=%x\n",
-		running->pid, p->pid, child_segment);
+	enqueue(&readyQueue, p);
+
+	nproc++;
+	if (filename){
+
+	segment = 0x1000*(p->pid+1);  // new PROC's segment
+	//load(filename, segment);      // load file to LOW END of segment
+	copy_image(segment);
+	 /********** ustack contents at HIGH END of ustack[ ] ************
+		PROC.usp
+	   -----|------------------------------------------------
+		  |uDS|uES|udi|usi|ubp|udx|ucx|ubx|uax|uPC|uCS|flag|
+	   -----------------------------------------------------
+		   -12 -11 -10 -9  -8  -7  -6  -5  -4  -3  -2   -1
+	 *****************************************************************/
+
+	 for (i=1; i<=12; i++){         // write 0's to ALL of them
+		 put_word(0, segment, -2*i);
+	 }
+	 
+	 put_word(0x0200,   segment, -2*1);   /* flag */  
+	 put_word(segment,  segment, -2*2);   /* uCS */  
+	 put_word(segment,  segment, -2*11);  /* uES */  
+	 put_word(segment,  segment, -2*12);  /* uDS */  
+
+
+	 /* initial USP relative to USS */
+	 p->usp = -2*12; 
+	 p->uss = segment;
+	}
+
+	printf("Proc %d kforked a child %d at segment=%x\n",
+		  running->pid, p->pid, segment);
 	return p;
 }
+
 
 int init()
 {
@@ -183,7 +195,7 @@ int scheduler()
      color = running->pid + 0x0A;
 }
 
-int int80h();
+
 
 int set_vec(u16 vector, u16 handler)
 {
