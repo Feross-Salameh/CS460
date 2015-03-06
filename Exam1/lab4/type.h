@@ -3,7 +3,7 @@ typedef unsigned short u16;
 typedef unsigned long  u32;
 
 #define NPROC    9
-#define SSIZE  512
+#define SSIZE  1024
 
 /******* PROC status ********/
 #define FREE     0

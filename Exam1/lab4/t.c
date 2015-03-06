@@ -78,35 +78,54 @@ PROC *kfork(char *filename)
   return p;
 }
 
+copy_p1image(u16 old, u16 segment)
+{
+	u32 offset = 0; 
+	int word;
+	printf("copying contents of %x to %x\n", old, segment);
+	for(offset = 0; offset < 65536; offset += 2)
+	{ 
+		word = get_word(old, offset); 
+		put_word(word, segment, offset); 
+	}
+
+}
+
 int hop(u32 newsegment)
 {
-	PROC *c, *old = 0;
-	int i;
-	
-	c = &proc[1];
-	
-	for(i = 0; i < NPROC; i++)
-		if(proc[i].uss == newsegment)
-		{
-			old = &proc[i];
-			break;
-		}
-	if(!old)
-	{
-		printf("newsegment not valid\n");
-		return -1;
-	}
-	
-	printf("Proceeding to break old process/switch p1\n");
-	for(i = 0; i < SSIZE; i++)
-		c->kstack[i] = old->kstack[i];
-		
-	c->ksp = &(c->kstack[SSIZE - 9]);
-	c->uss = old->uss;
-	c->usp = old->uss;
-	
-	old->status = ZOMBIE;
-	retun 1;
+	PROC *p;
+	int  i, child;
+	char *filename = "/bin/u1";
+	printf("hop called\n");
+	p = &proc[1];
+	printf("p is %d\n", p->pid);
+
+	// clear all SAVed registers on kstack
+	for (i=1; i<10; i++)
+	  p->kstack[SSIZE-i] = 0;
+
+	// fill in resume address
+	p->kstack[SSIZE-1] = (int)goUmode;
+	// save stack TOP address in PROC
+	p->ksp = &(p->kstack[SSIZE - 9]);
+
+	copy_p1image(p->uss, newsegment);
+
+	 for (i=1; i<=12; i++){         // write 0's to ALL of them
+		 put_word(0, newsegment, -2*i);
+	 }
+	 
+     put_word(0x0200,   newsegment, -2*1);   /* flag */  
+     put_word(newsegment,  newsegment, -2*2);   /* uCS */  
+     put_word(newsegment,  newsegment, -2*7);  /* uES */  
+     put_word(newsegment,  newsegment, -2*8);  /* uDS */  
+
+     p->usp = -2*8; 
+     p->uss = newsegment;
+
+	printf("Proc %d kforked a child %d at segment=%x\n",
+		  running->pid, p->pid, newsegment);
+	return p;
 }
 
 int init()

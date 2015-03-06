@@ -50,7 +50,7 @@ int kcinth()
        case 4 : r = ktswitch();       break;
        case 5 : r = kkwait(b);        break;
        case 6 : r = kkexit(b);        break;
-       case 7 : r = khop(b);
+       case 7 : r = khop(b);		  break;
        case 12 : r = kgetname(b);	  break;
 
    case 90: r = getc();               break;
@@ -130,13 +130,21 @@ int kps()
   return do_ps();
 }
 
-int kgetname(char *name[64])
+int kgetname(char *y)
 {
-	int len = 0;
-	printf("getting name...\n");
-	len = getname(*name);
-	printf("in int.c: %s, len %d\n", *name, len);
-	//len = strlen(*name);
+	char buf[64], name[64];
+	char *cp = buf;
+	int count = 0, len = 0;
+	u8 bt;
+
+	buf[count+1] = 0;
+	
+	len = getname(buf);
+	
+	for(count = 0; count < len; count++)
+		put_byte(*cp++, running->uss, y++);
+	put_byte(0, running->uss, y);
+	
 	return len;
 }
 
@@ -146,6 +154,7 @@ int khop(u32 newsegment)
 	
 	return hop(newsegment);
 	
+	printf("returning from khop\n");
 }
 
 int kkfork()
