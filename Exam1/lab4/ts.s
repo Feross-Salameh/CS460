@@ -53,19 +53,14 @@ RESUME:
 !These offsets are defined in struct proc
 USS =   4
 USP =   6
-
 _int80h:
-        push ax                 ! save all Umode registers in ustack
+        push ax                 ! save SOME Umode registers in ustack
         push bx
-        push cx
-        push dx
         push bp
-        push si
-        push di
         push es
         push ds
 
-! ustack contains : flag,uCS,uPC, ax,bx,cx,dx,bp,si,di,ues,uds
+! ustack contains : flag,uCS,uPC, ax,bp,ues,uds
         push cs
         pop  ds                 ! KDS now
 
@@ -91,17 +86,12 @@ _goUmode:
         mov ax,USS[bx]
         mov ss,ax               ! restore uSS
         mov sp,USP[bx]          ! restore uSP
-  
+
+
 	pop ds
 	pop es
-	pop di
-        pop si
         pop bp
-        pop dx
-        pop cx
         pop bx
-        pop ax                  ! NOTE: contains return value to Umode     
+        pop ax             
 	
-        iret
-
-	
+        iret	

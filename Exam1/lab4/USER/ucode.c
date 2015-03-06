@@ -1,14 +1,14 @@
 // ucode.c file
 
-char *cmd[]={"getpid", "ps", "chname", "kfork", "switch", "wait", "exit", 0};
+char *cmd[]={"getpid", "ps", "chname", "kfork", "switch", "wait", "exit", "name", 0};
 
 #define LEN 64
 
 int show_menu()
 {
-   printf("***************** Menu *******************\n");
-   printf("*  ps  chname  kfork  switch  wait  exit *\n");
-   printf("******************************************\n");
+   printf("***************** Menu **************************\n");
+   printf("*  ps  chname  kfork  switch  wait  exit  name  *\n");
+   printf("*************************************************\n");
 }
 
 int find_cmd(char *name)
@@ -90,6 +90,14 @@ int _exit(int exitValue)
 }
 
 
+int getName()
+{
+	int *len = 0;
+	char *name[64];
+	*len = syscall(12, name, 0);
+	printf("Name returned: %s, len {%d}\n", name, *len);
+}
+
 int getc()
 {
   return syscall(90,0,0) & 0x7F;
@@ -103,4 +111,12 @@ int putc(char c)
 int invalid(char *name)
 {
     printf("Invalid command : %s\n", name);
+}
+
+hop()
+{
+	int nseg;
+	
+	printf("enter new segment: ")
+	
 }

@@ -4,13 +4,16 @@ PROC proc[NPROC], *running, *freeList, *readyQueue, *sleepList;
 int procSize = sizeof(PROC);
 int nproc = 0;
 int color;
-
+int goUmode();
 int body();
 char *pname[]={"Sun", "Mercury", "Venus", "Earth",  "Mars", "Jupiter", 
                "Saturn", "Uranus", "Neptune" };
 //#include "queue.c"
 
 #include "int.c"
+
+
+
 
 /***********************************************************
   kfork() creates a child proc and returns the child pid.
@@ -20,7 +23,9 @@ PROC *kfork(char *filename)
 {
   PROC *p;
   int  i, child;
+  char inp[64];
   u16  segment;
+  u16 temp;
   printf("kfork called\n");
   /*** get a PROC for child process: ***/
   if ( (p = get_proc(&freeList)) == 0){
@@ -33,12 +38,10 @@ PROC *kfork(char *filename)
   p->parent = running;
   p->priority  = 1;                 // all of the same priority 1
 
-  // clear all SAVed registers on kstack
   for (i=1; i<10; i++)
       p->kstack[SSIZE-i] = 0;
  
-  // fill in resume address
-  p->kstack[SSIZE-1] = (int)body;
+  p->kstack[SSIZE-1] = (int)goUmode;
   // save stack TOP address in PROC
   p->ksp = &(p->kstack[SSIZE - 9]);
 
@@ -51,32 +54,59 @@ PROC *kfork(char *filename)
      load(filename, segment);      // load file to LOW END of segment
 
      /********** ustack contents at HIGH END of ustack[ ] ************
-        PROC.usp
-       -----|------------------------------------------------
-          |uDS|uES|udi|usi|ubp|udx|ucx|ubx|uax|uPC|uCS|flag|
+						PROC.usp
+					   -----|------------------------------------------------
+						  |uDS|uES|ubp|ubx|uax|uPC|uCS|flag|
        -----------------------------------------------------
            -12 -11 -10 -9  -8  -7  -6  -5  -4  -3  -2   -1
      *****************************************************************/
-
-     for (i=1; i<=12; i++){         // write 0's to ALL of them
-         put_word(0, segment, -2*i);
-     }
-     
+	
      put_word(0x0200,   segment, -2*1);   /* flag */  
      put_word(segment,  segment, -2*2);   /* uCS */  
-     put_word(segment,  segment, -2*11);  /* uES */  
-     put_word(segment,  segment, -2*12);  /* uDS */  
+     put_word(segment,  segment, -2*7);  /* uES */  
+     put_word(segment,  segment, -2*8);  /* uDS */  
 
-     // YOU WRITE CODE TO FILL IN uDS, uES, uCS
-
-     /* initial USP relative to USS */
-     p->usp = -2*12; 
+     p->usp = -2*8; 
      p->uss = segment;
+
+     
   }
 
   printf("Proc %d kforked a child %d at segment=%x\n",
           running->pid, p->pid, segment);
+
   return p;
+}
+
+int hop(u32 newsegment)
+{
+	PROC *c, *old = 0;
+	int i;
+	
+	c = &proc[1];
+	
+	for(i = 0; i < NPROC; i++)
+		if(proc[i].uss == newsegment)
+		{
+			old = &proc[i];
+			break;
+		}
+	if(!old)
+	{
+		printf("newsegment not valid\n");
+		return -1;
+	}
+	
+	printf("Proceeding to break old process/switch p1\n");
+	for(i = 0; i < SSIZE; i++)
+		c->kstack[i] = old->kstack[i];
+		
+	c->ksp = &(c->kstack[SSIZE - 9]);
+	c->uss = old->uss;
+	c->usp = old->uss;
+	
+	old->status = ZOMBIE;
+	retun 1;
 }
 
 int init()
@@ -110,11 +140,23 @@ int init()
 
 int scheduler()
 {
-    if (running->status == READY)
-        enqueue(&readyQueue, running);
-     running = dequeue(&readyQueue);
-     color = running->pid + 0x0A;
+	printf("in scheduler\n");
+	if (running->status == READY)
+		enqueue(&readyQueue, running);
+	running = dequeue(&readyQueue);
+	color = running->pid + 0x0A;
+    printf("leaving scheduler\n"); 
+    //print_stack(10, running->uss);
 }
+
+int getname(char  name[64])
+{
+	strcpy(name, pname[running->pid]);
+	printf("name copied: %s\n", name);
+	return strlen(name);
+	
+}
+
 
 int int80h();
 
@@ -130,7 +172,6 @@ main()
     printf("MTX starts in main()\n");
     init();      // initialize and create P0 as running
     set_vec(80, int80h);
-
     kfork("/bin/u1");     // P0 kfork() P1
 
     while(1){

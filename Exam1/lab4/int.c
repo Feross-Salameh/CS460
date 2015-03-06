@@ -1,29 +1,46 @@
-
 /*************************************************************************
   usp  1   2   3   4   5   6   7   8   9  10   11   12    13  14  15  16
 ----------------------------------------------------------------------------
  |uds|ues|udi|usi|ubp|udx|ucx|ubx|uax|upc|ucs|uflag|retPC| a | b | c | d |
 ----------------------------------------------------------------------------
 ***************************************************************************/
-#define PA 13
-#define PB 14
-#define PC 15
-#define PD 16
-#define AX  8
+#define PA 9
+#define PB 10
+#define PC 11
+#define PD 12
+#define AX  4
+
+print_stack(int length, u16 seg)
+{
+	int i;
+	u16 word = 0;
+	printf("printing stack at: %x, %d many times.\n", seg, length);
+	for(i = 1; i < length; i++)
+	{
+		word = get_word(seg, -2*i);
+		printf("%d: |%x|\n", -i, word);
+		
+	}
+	printf("\nEnd of print stack\n");
+	getc();
+}
+
+
 
 /****************** syscall handler in C ***************************/
 int kcinth()
 {
    u16    segment, offset;
    int    a,b,c,d, r;
+   char inp(21);
    segment = running->uss; 
    offset = running->usp;
-
    /** get syscall parameters from ustack **/
    a = get_word(segment, offset + 2*PA);
    b = get_word(segment, offset + 2*PB);
    c = get_word(segment, offset + 2*PC);
    d = get_word(segment, offset + 2*PD);
+
 
    switch(a){
        case 0 : r = running->pid;     break;
@@ -33,6 +50,8 @@ int kcinth()
        case 4 : r = ktswitch();       break;
        case 5 : r = kkwait(b);        break;
        case 6 : r = kkexit(b);        break;
+       case 7 : r = khop(b);
+       case 12 : r = kgetname(b);	  break;
 
    case 90: r = getc();               break;
    case 91: r = putc(b);              break;
@@ -109,6 +128,24 @@ int kchname(char * y)
 int kps()
 {
   return do_ps();
+}
+
+int kgetname(char *name[64])
+{
+	int len = 0;
+	printf("getting name...\n");
+	len = getname(*name);
+	printf("in int.c: %s, len %d\n", *name, len);
+	//len = strlen(*name);
+	return len;
+}
+
+int khop(u32 newsegment)
+{
+	printf("p1 attempting to hop to %x\n", newsegment);
+	
+	return hop(newsegment);
+	
 }
 
 int kkfork()
