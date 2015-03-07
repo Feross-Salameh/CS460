@@ -40,7 +40,7 @@ int kcinth()
    b = get_word(segment, offset + 2*PB);
    c = get_word(segment, offset + 2*PC);
    d = get_word(segment, offset + 2*PD);
-
+	
 
    switch(a){
        case 0 : r = running->pid;     break;

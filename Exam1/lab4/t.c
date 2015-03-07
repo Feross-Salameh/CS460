@@ -91,41 +91,43 @@ copy_p1image(u16 old, u16 segment)
 
 }
 
+
+copy_image(u16 child_segment)
+{
+	u16 offset = 0; 
+	int word;
+
+	for(offset = 0; offset < 0x1000; offset++)
+	{ 
+		word = get_word(running->uss, offset); 
+		put_word(word, child_segment, offset); 
+	}
+
+}
+
 int hop(u32 newsegment)
 {
 	PROC *p;
+	u32 j;
+	u16 olds= 0;
 	int  i, child;
-	char *filename = "/bin/u1";
-	printf("hop called\n");
 	p = &proc[1];
-	printf("p is %d\n", p->pid);
 
-	// clear all SAVed registers on kstack
-	for (i=1; i<10; i++)
-	  p->kstack[SSIZE-i] = 0;
-
-	// fill in resume address
-	p->kstack[SSIZE-1] = (int)goUmode;
-	// save stack TOP address in PROC
-	p->ksp = &(p->kstack[SSIZE - 9]);
-
-	copy_p1image(p->uss, newsegment);
-
-	 for (i=1; i<=12; i++){         // write 0's to ALL of them
-		 put_word(0, newsegment, -2*i);
-	 }
+	for(j = 0;j < 64 * 1024; j += 2)
+	{
+		olds = get_word(p->uss, j);
+		put_word(olds, newsegment, j); 
+	}
 	 
      put_word(0x0200,   newsegment, -2*1);   /* flag */  
      put_word(newsegment,  newsegment, -2*2);   /* uCS */  
      put_word(newsegment,  newsegment, -2*7);  /* uES */  
      put_word(newsegment,  newsegment, -2*8);  /* uDS */  
-
-     p->usp = -2*8; 
+     
+     print_stack(15, newsegment);
+     
+     p->usp = -2*8;
      p->uss = newsegment;
-
-	printf("Proc %d kforked a child %d at segment=%x\n",
-		  running->pid, p->pid, newsegment);
-	return p;
 }
 
 int init()

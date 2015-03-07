@@ -21,8 +21,8 @@ SAVE:
 
 	push bp
 	pushf
-	push si
-	push di
+	push ds
+	push ss
 	push es
 	
 	mov  bx,_running
@@ -35,8 +35,8 @@ RESUME:
 	mov  sp,2[bx]
 	
 	pop  es
-	pop  di
-	pop  si
+	pop  ss
+	pop  ds
 	popf
 	pop  bp
 
