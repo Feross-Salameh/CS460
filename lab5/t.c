@@ -84,10 +84,10 @@ PROC *kfork(char *filename)
 
 copy_image(u16 child_segment)
 {
-	u16 offset = 0; 
+	u32 offset = 0; 
 	int word;
 
-	for(offset = 0; offset < 0x1000; offset++)
+	for(offset = 0; offset < 0x10000; offset += 2)
 	{ 
 		word = get_word(running->uss, offset); 
 		put_word(word, child_segment, offset); 
@@ -128,12 +128,14 @@ PROC *kufork(char *filename)
 
 	segment = 0x1000*(p->pid+1);  // new PROC's segment
 	//load(filename, segment);      // load file to LOW END of segment
+	printf("Copy segement called\n");
 	copy_image(segment);
+	printf("copy segement left\n");
 	 /********** ustack contents at HIGH END of ustack[ ] ************
 		PROC.usp
 	   -----|------------------------------------------------
 		  |uDS|uES|udi|usi|ubp|udx|ucx|ubx|uax|uPC|uCS|flag|
-	   -----------------------------------------------------
+	   --------------------------------------a---------------
 		   -12 -11 -10 -9  -8  -7  -6  -5  -4  -3  -2   -1
 	 *****************************************************************/
 
@@ -141,10 +143,10 @@ PROC *kufork(char *filename)
 		 put_word(0, segment, -2*i);
 	 }
 	 
-	 put_word(0x0200,   segment, -2*1);   /* flag */  
-	 put_word(segment,  segment, -2*2);   /* uCS */  
-	 put_word(segment,  segment, -2*11);  /* uES */  
-	 put_word(segment,  segment, -2*12);  /* uDS */  
+	 put_word(0x0200,   segment, 0x10000-2*1);   /* flag */  
+	 put_word(segment,  segment, 0x10000-2*2);   /* uCS */  
+	 put_word(segment,  segment, 0x10000-2*11);  /* uES */  
+	 put_word(segment,  segment, 0x10000-2*12);  /* uDS */  
 
 
 	 /* initial USP relative to USS */
