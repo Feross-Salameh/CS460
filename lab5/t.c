@@ -9,6 +9,7 @@ int body();
 int goUmode();
 int int80h();
 PROC *kufork(char *filename);
+int exec(char *filename);
 char *pname[]={"Sun", "Mercury", "Venus", "Earth",  "Mars", "Jupiter", 
                "Saturn", "Uranus", "Neptune" };
 //#include "queue.c"
@@ -157,6 +158,17 @@ PROC *kufork(char *filename)
 	printf("Proc %d kforked a child %d at segment=%x\n",
 		  running->pid, p->pid, segment);
 	return p;
+}
+
+int exec(char *filename)
+{
+	// maybe get a new proc?
+	
+	if(filename)
+	{
+		load(filename, segment);
+	}
+	
 }
 
 

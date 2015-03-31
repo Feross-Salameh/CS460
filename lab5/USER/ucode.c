@@ -6,9 +6,9 @@ char *cmd[]={"getpid", "ps", "chname", "kfork", "switch", "wait", "exit", "fork"
 
 int show_menu()
 {
-   printf("***************** Menu ************************\n");
-   printf("*  ps  chname  kfork  switch  wait  exit fork *\n");
-   printf("***********************************************\n");
+   printf("***************** Menu *****************************\n");
+   printf("*  ps  chname  kfork  switch  wait  exit fork exec *\n");
+   printf("****************************************************\n");
 }
 
 int find_cmd(char *name)
