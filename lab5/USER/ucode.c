@@ -1,6 +1,6 @@
 // ucode.c file
 
-char *cmd[]={"getpid", "ps", "chname", "kfork", "switch", "wait", "exit", "fork", 0};
+char *cmd[]={"getpid", "ps", "chname", "kfork", "switch", "wait", "exit", "fork", "exec", 0};
 
 #define LEN 64
 
@@ -91,6 +91,11 @@ int ufork()
   printf("proc %d entered ufork\n", pid); 
   child = syscall(7, 0, 0);
   printf("proc %d forked a child %d\n", pid, child);
+}
+
+int uexec()
+{
+	syscall(8,0,0);
 }
 
 int _exit(int exitValue)

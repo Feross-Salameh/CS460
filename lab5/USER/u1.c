@@ -27,6 +27,7 @@ main()
            case 5 : wait();     break;
            case 6 : exit();     break;
 		   case 7 : ufork();    break;
+		   case 8 : uexec();	break;
            default: invalid(name); break;
     }
   }

@@ -162,12 +162,29 @@ PROC *kufork(char *filename)
 
 int exec(char *filename)
 {
+	u16 segment;
+	int i;
 	// maybe get a new proc?
 	
 	if(filename)
 	{
 		load(filename, segment);
+		segment = running->uss;
+		for(i =0; i < 13; i++)
+			put_word(0, segment, -2*i);
+			
+		put_word(0x200, segment, -2*1);
+		put_word(segment, segment, -2*2);
+		put_word(segment, segment, -2*11);
+		put_word(segment, segment, -2*12);
+		
+		running->usp = -2*12;
+		running->uss = segment;	
 	}
+	else 
+		return -1;
+		
+	return 1;
 	
 }
 

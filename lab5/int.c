@@ -34,6 +34,7 @@ int kcinth()
        case 5 : r = kkwait(b);        break;
        case 6 : r = kkexit(b);        break;
        case 7 : r = ufork();		  break;
+       case 8 : r = kexec();		  break;
 
    case 90: r = getc();               break;
    case 91: r = putc(b);              break;
@@ -122,6 +123,19 @@ int ufork()
 {
 	PROC *p = kufork("/bin/u1");
 	return p->pid;
+}
+
+int kexec ()
+{
+	char inp[128]; 
+	printf("Enter filename(/bin/u1 by default): ");
+	gets(inp);
+	
+	if(strcmp(inp, ""))
+		strcpy(inp, "/bin/u1");
+
+
+	return exec(inp);
 }
 
 int ktswitch()
