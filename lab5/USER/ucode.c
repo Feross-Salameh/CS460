@@ -96,6 +96,7 @@ int ufork()
 int uexec()
 {
 	syscall(8,0,0);
+	printf("exiting uexec\n");
 }
 
 int _exit(int exitValue)

@@ -71,8 +71,6 @@ PROC *kfork(char *filename)
 	 put_word(segment,  segment, -2*11);  /* uES */  
 	 put_word(segment,  segment, -2*12);  /* uDS */  
 
-	 // YOU WRITE CODE TO FILL IN uDS, uES, uCS
-
 	 /* initial USP relative to USS */
 	 p->usp = -2*12; 
 	 p->uss = segment;
@@ -164,27 +162,36 @@ int exec(char *filename)
 {
 	u16 segment;
 	int i;
-	// maybe get a new proc?
 	
 	if(filename)
 	{
 		printf("finished loading segment\n");
+		
 		segment = running->uss;
-		load(filename, segment);
-		for(i =0; i <= 12; i++)
-			put_word(0, segment, -2*i);
-			
-		put_word(0x0200,   segment, -2*1);   /* flag */  
-		put_word(segment,  segment, -2*2);   /* uCS */  
-		put_word(segment,  segment, -2*11);  /* uES */  
-		put_word(segment,  segment, -2*12);  /* uDS */  
-		printf("stack is setup\n");
-		running->usp = -2*12;
-		running->uss = segment;	
+		 load(filename, segment);      // load file to LOW END of segment
+
+		 /********** ustack contents at HIGH END of ustack[ ] ************
+			PROC.usp
+		   -----|------------------------------------------------
+			  |uDS|uES|udi|usi|ubp|udx|ucx|ubx|uax|uPC|uCS|flag|
+		   -----------------------------------------------------
+			   -12 -11 -10 -9  -8  -7  -6  -5  -4  -3  -2   -1
+		 *****************************************************************/
+
+		 for (i=1; i<=12; i++){         // write 0's to ALL of them
+			 put_word(0, segment, -2*i);
+		 }
+		 put_word(0, segment, -2*3);
+		 put_word(0x0200,   segment, -2*1);   /* flag */  
+		 put_word(segment,  segment, -2*2);   /* uCS */  
+		 put_word(segment,  segment, -2*11);  /* uES */  
+		 put_word(segment,  segment, -2*12);  /* uDS */  
+
+		 /* initial USP relative to USS */
+		 running->usp = -2*12; 
 	}
 	else 
 		return -1;
-	printf("returning from exec\n");
 	return 1;
 	
 }
