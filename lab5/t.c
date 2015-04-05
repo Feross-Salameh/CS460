@@ -168,22 +168,23 @@ int exec(char *filename)
 	
 	if(filename)
 	{
-		load(filename, segment);
+		printf("finished loading segment\n");
 		segment = running->uss;
-		for(i =0; i < 13; i++)
+		load(filename, segment);
+		for(i =0; i <= 12; i++)
 			put_word(0, segment, -2*i);
 			
-		put_word(0x200, segment, -2*1);
-		put_word(segment, segment, -2*2);
-		put_word(segment, segment, -2*11);
-		put_word(segment, segment, -2*12);
-		
+		put_word(0x0200,   segment, -2*1);   /* flag */  
+		put_word(segment,  segment, -2*2);   /* uCS */  
+		put_word(segment,  segment, -2*11);  /* uES */  
+		put_word(segment,  segment, -2*12);  /* uDS */  
+		printf("stack is setup\n");
 		running->usp = -2*12;
 		running->uss = segment;	
 	}
 	else 
 		return -1;
-		
+	printf("returning from exec\n");
 	return 1;
 	
 }
