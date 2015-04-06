@@ -128,13 +128,12 @@ int ufork()
 int kexec ()
 {
 	char inp[128]; 
-	printf("Enter filename(/bin/u1 by default): ");
+	printf("Enter filename('/bin/u1' by default): ");
 	gets(inp);
 	
-	if(strcmp(inp, ""))
+	if(!strcmp(inp, ""))
 		strcpy(inp, "/bin/u1");
-
-
+		
 	return exec(inp);
 }
 
