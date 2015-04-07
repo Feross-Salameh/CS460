@@ -9,7 +9,7 @@ mount -o loop $VFD /mnt
 cp mtx /mnt/boot
 umount /mnt
 
-(cd USER; mku u1)
+(cd USER; ./mku u1)
 
 rm *.o mtx
 echo done
