@@ -17,7 +17,7 @@ PIPE pipe[NPIPE];
 //#include "kernel.c"
 #include "int.c"
 //#include "fe.c"
-#include "pipe.c"
+//#include "pipe.c"
 
 int init()
 {

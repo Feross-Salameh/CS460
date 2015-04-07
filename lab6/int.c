@@ -8,7 +8,7 @@
 int kcinth()
 {
    u16    segment, offset;
-   int    a,b,c,d, r;
+   int    a,b,c,d, r, color;
 
    segment = running->uss; 
    offset = running->usp;

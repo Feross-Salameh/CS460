@@ -1,3 +1,6 @@
+#ifndef TYPE
+#define TYPE
+
 typedef unsigned char   u8;
 typedef unsigned short u16;
 typedef unsigned long  u32;
@@ -54,3 +57,8 @@ typedef struct proc{
     
     int    kstack[SSIZE];      // per proc stack area
 }PROC;
+
+
+//void show_pipe(PIPE *p);
+
+#endif

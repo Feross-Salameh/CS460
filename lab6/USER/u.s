@@ -1,4 +1,4 @@
-	.globl _syscall,_main0,_exit,auto_start
+	.globl _syscall,_main,_exit,auto_start
         .globl _getcs
 
          call _main
