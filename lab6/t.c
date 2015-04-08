@@ -14,10 +14,10 @@ PIPE pipe[NPIPE];
   bio.o, queue.o loader.o are in mtxlib
 **************************************************/
 #include "wait.c"
-//#include "kernel.c"
+#include "kernel.c"
 #include "int.c"
-//#include "fe.c"
-//#include "pipe.c"
+#include "forkexec.c"
+#include "pipe.c"
 
 int init()
 {

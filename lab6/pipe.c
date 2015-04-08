@@ -1,5 +1,3 @@
-#include "type.h"
-
 void show_pipe(PIPE *p)
 {
    int i, j;

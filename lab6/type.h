@@ -58,7 +58,6 @@ typedef struct proc{
     int    kstack[SSIZE];      // per proc stack area
 }PROC;
 
-
-//void show_pipe(PIPE *p);
+int goUmode();
 
 #endif

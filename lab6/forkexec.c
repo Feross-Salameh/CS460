@@ -1,6 +1,5 @@
 int copyImage(u16 child_segment)
 {
-  // your copyimage function
 	u32 offset = 0; 
 	int word;
 
@@ -17,7 +16,7 @@ int fork()
 
 	PROC *p = kfork(0);   // kfork() but do NOT load any Umode image for child 
 	if (p == 0)           // kfork failed 
-	return -1;
+		return -1;
 
 	segment = (p->pid+1)*0x1000;
 	copyImage(segment);
