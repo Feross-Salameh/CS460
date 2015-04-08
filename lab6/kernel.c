@@ -1,5 +1,3 @@
-
-
 PROC *get_proc()
 {
 	PROC * ret; 
@@ -39,7 +37,7 @@ PROC *kfork()
 }
 
 
-//kexit(int value)
+//do_exit(int value)
 //{
 	//int i = 0;
 	//if(running->pid == 1)
@@ -76,18 +74,18 @@ PROC *kfork()
 	//tswitch();
 //}
 
-kwake(int value)
-{
-	int i;
-	for(i = 0; i < NPROC; i++)
-	{
-		if(proc[i].status == SLEEP && proc[i].event == value)
-		{
-			rmProc(&sleepList, &proc[i]);
-			enqueue(&readyQueue, &proc[i]);
-		}
-	}
-}
+//wakeup(int value)
+//{
+	//int i;
+	//for(i = 0; i < NPROC; i++)
+	//{
+		//if(proc[i].status == SLEEP && proc[i].event == value)
+		//{
+			//rmProc(&sleepList, &proc[i]);
+			//enqueue(&readyQueue, &proc[i]);
+		//}
+	//}
+//}
 
 //kwait(int *status)
 //{

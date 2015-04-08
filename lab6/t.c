@@ -7,6 +7,9 @@ int nproc = 0;
 int body();
 char *pname[]={"Sun", "Mercury", "Venus", "Earth",  "Mars", "Jupiter", 
                "Saturn", "Uranus", "Neptune" };
+char *hh[ ] = {"FREE   ", "READY  ", "RUNNING", "STOPPED", "SLEEP  ", 
+               "ZOMBIE ",  0};                
+
 OFT  oft[NOFT];
 PIPE pipe[NPIPE];
 
@@ -18,6 +21,64 @@ PIPE pipe[NPIPE];
 #include "int.c"
 #include "forkexec.c"
 #include "pipe.c"
+
+int do_ps()
+{
+   int i,j; 
+   char *p, *q, buf[16];
+   buf[15] = 0;
+
+   printf("============================================\n");
+   printf("  name         status      pid       ppid  \n");
+   printf("--------------------------------------------\n");
+
+   for (i=0; i<NPROC; i++){
+       strcpy(buf,"               ");
+       p = proc[i].name;
+       j = 0;
+       while (*p){
+             buf[j] = *p; j++; p++;
+       }      
+       prints(buf);    prints(" ");
+       
+       if (proc[i].status != FREE){
+           if (running==&proc[i])
+              prints("running");
+           else
+              prints(hh[proc[i].status]);
+           prints("     ");
+           printd(proc[i].pid);  prints("        ");
+           printd(proc[i].ppid);
+       }
+       else{
+              prints("FREE");
+       }
+       printf("\n");
+   }
+   printf("---------------------------------------------\n");
+
+   return(0);
+}
+
+
+#define NAMELEN 32
+int chname(char * y)
+{
+  char buf[64];
+  char *cp = buf;
+  int count = 0; 
+
+  while (count < NAMELEN){
+     *cp = get_byte(running->uss, y);
+     if (*cp == 0) break;
+     cp++; y++; count++;
+  }
+  buf[31] = 0;
+
+  printf("changing name of proc %d to %s\n", running->pid, buf);
+  strcpy(running->name, buf); 
+  printf("done\n");
+}
 
 int init()
 {
