@@ -1,7 +1,7 @@
-	.globl _syscall,_main,_exit
+	.globl _syscall,_main0,_exit
         .globl _getcs
 
-         call _main
+         call _main0
 
 
 	

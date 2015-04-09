@@ -1,6 +1,6 @@
 #include "ucode.c"
 int color;
-int main()
+main()
 { 
   char name[64]; int pid, cmd;
 

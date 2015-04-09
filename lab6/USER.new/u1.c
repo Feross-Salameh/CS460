@@ -1,8 +1,7 @@
 #include "ucode.c"
 int color;
-
 main()
-{  
+{ 
   char name[64]; int pid = 0, cmd, segment, i;
   pid = getpid();
   color = 0x000B + (pid % 5);  // avoid black on black baground
@@ -42,5 +41,6 @@ main()
        } 
   }
 }
+
 
 

@@ -59,5 +59,6 @@ typedef struct proc{
 }PROC;
 
 int goUmode();
-
+//int body();
+int wakeup(int event);
 #endif

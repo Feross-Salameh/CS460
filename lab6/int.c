@@ -45,3 +45,26 @@ int kcinth()
    }
    put_word(r, segment, offset + 2*AX);
 }
+
+int kmode()
+{
+//	running->kstack[SSIZE - 1] = (int)body;
+	return 1;
+}
+
+int do_wait(int value)
+{
+	printf("wait entered\n");
+	kwait(value);
+	printf("leaving wait\n");
+	return 1;
+}
+
+int do_exit(int value)
+{
+	printf("exit entered\n");
+	kexit(value);
+	printf("leaving exit\n");
+	return 1;
+	
+}

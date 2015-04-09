@@ -23,6 +23,8 @@ int read_pipe(int fd, char *buf, int n)
 int write_pipe(int fd, char *buf, int n)
 {
   // your code for write_pipe()
+  PROC *pr;
+  PIPE *pi;
 }
 
 int kpipe(int pd[2])

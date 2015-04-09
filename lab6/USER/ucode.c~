@@ -126,7 +126,7 @@ int read_pipe()
   int fd, n, nbytes;
   pfd();
 
-  printf("What fd would you like to read from? ");
+    printf("What fd would you like to read from? ");
   fd = (getc()&0x7F) - '0';
   putc(fd+'0');
   getc();
@@ -154,16 +154,9 @@ int write_pipe()
   char fds[16], buf[1024]; 
   int fd, n, nbytes;
   pfd();
-  printf("What fd would you like to read from? ");
-  fd = (getc()&0x7F) - '0';
-  putc(fd+'0');
-  getc();
-  printf("\n");
-  printf("How many bytes should be read? ");
+  printf("write : enter fd text : ");
   gets(fds);
-  nbytes = atoi(fds);
-  printf("\n");
-  printf("fd=%d  nbytes=%d\n", fd, nbytes);
+  //sscanf(fds, "%d %s", &fd, buf);
   nbytes = strlen(buf);
             
   printf("fd=%d nbytes=%d : %s\n", fd, nbytes, buf);

@@ -4,7 +4,7 @@ PROC proc[NPROC], *running, *freeList, *readyQueue, *sleepList;
 int procSize = sizeof(PROC);
 int nproc = 0;
 
-int body();
+
 char *pname[]={"Sun", "Mercury", "Venus", "Earth",  "Mars", "Jupiter", 
                "Saturn", "Uranus", "Neptune" };
 char *hh[ ] = {"FREE   ", "READY  ", "RUNNING", "STOPPED", "SLEEP  ", 
@@ -142,7 +142,7 @@ main()
     init();      // initialize and create P0 as running
     set_vector(80,int80h);
 
-    kfork("/bin/u1");     // P0 kfork() P1
+    fork("/bin/u1");     // P0 kfork() P1
 
     while(1){
       printf("P0 running\n");

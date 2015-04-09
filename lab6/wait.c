@@ -6,7 +6,7 @@ int ksleep(int event)
 	tswitch();
 }
   
-int kwakeup(int event)
+int wakeup(int event)
 {
 	int i;
 	for(i = 0; i < NPROC; i++)
@@ -28,7 +28,6 @@ int kwait(int *status)
 
 	if(!b)
 		return -1;
-
 	while(1)
 	{
 		for(i = 0; i < NPROC; i++)
@@ -66,13 +65,13 @@ int kexit(int exitValue)
 	for(i = 0; i < NPROC; i++)
 		if(proc[NPROC].ppid == 1)
 		{
-			kwake(proc[1]);
+			wakeup(proc[1]);
 			proc[NPROC].parent = &proc[1];
 		}
 	
 	
 	running->exitCode = exitValue;
-	kwake(running->parent);
+	wakeup(running->parent);
 	running->status = ZOMBIE;
 
 	// ADD: close opened file descriptors
