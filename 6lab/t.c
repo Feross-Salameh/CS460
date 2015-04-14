@@ -13,6 +13,8 @@ char *hh[ ] = {"FREE   ", "READY  ", "RUNNING", "STOPPED", "SLEEP  ",
 OFT  oft[NOFT];
 PIPE pipe[NPIPE];
 
+
+
 /**************************************************
   bio.o, queue.o loader.o are in mtxlib
 **************************************************/
@@ -22,6 +24,55 @@ PIPE pipe[NPIPE];
 #include "forkexec.c"
 #include "pipe.c"
 
+
+
+int wakeup(int event)
+{
+	int i;
+	for(i = 0; i < NPROC; i++)
+	{
+		if(proc[i].status == SLEEP && proc[i].event == event)
+		{
+			rmProc(&sleepList, &proc[i]);
+			enqueue(&readyQueue, &proc[i]);
+		}
+	}
+}
+rmProc(PROC **list, PROC *p)
+{
+	PROC *temp;
+	if((*list) == 0)
+		return;
+	
+	if((*list)->event == p->event)
+		(*list) = 0;
+		
+	while((*list)->next != 0)
+	{
+		temp = (*list)->next;
+		if(temp->event == p->event)
+			temp = temp->next;
+		(*list) = (*list)->next;
+	}
+}
+printQueue(PROC *queue)
+{
+	PROC *temp = queue;
+	if(queue == 0)
+	{
+		printf("Nothing in queue\n");
+		return;
+	}
+	printf("[%d,%d]", temp->pid, temp->priority);
+	temp = temp->next;
+	while(temp != 0)
+	{
+		printf("->[%d,%d]", temp->pid, temp->priority);
+		temp = temp->next;
+	}
+	printf("\n");
+	
+}
 
 int do_ps()
 {
@@ -163,41 +214,6 @@ main()
    }
 }
 
-
-int body()
-{
-  char c;
-  printf("proc %d resumes to body()\n", running->pid);
-  while(1){
-    printf("-----------------------------------------\n");
-            //print freeList;
-            printf("freeList: "); printQueue(freeList);
-            // print readyQueue;
-            printf("readyQueue: "); printQueue(readyQueue);
-            // print sleepList;
-            printf("sleepList: "); printQueue(sleepList);
-    printf("-----------------------------------------\n");
-
-    printf("proc %d[%d] running: parent=%d\n",
-	   running->pid, running->priority, running->ppid);
-
-    printf("enter a char [s|f|q|l|p|z|a|w|u] : ");
-    c = getc(); printf("%c\n", c);
-  
-    switch(c){
-       case 's' : do_tswitch();   break;
-       case 'f' : do_kfork();     break;
-       case 'q' : do_exit();      break;
-       case 'l' : printLists();   break; 
-       case 'p' : do_ps();        break; 
-       case 'z' : do_sleep();     break; 
-       case 'a' : do_wake();    break; 
-       case 'w' : do_wait();      break;
-       case 'u' : goUmode();		break;
-     }
-  }
-}
-
 printLists()
 {
 	printf("-------------------------Process'--------------------------\n");
@@ -216,31 +232,9 @@ do_sleep()
 	ksleep(running->pid);
 }
 
-do_kfork()
-{
-	PROC *p;
-	printf("Forking child process\n");
-	p = kfork();
-	if(p == 0)
-	{
-		printf("kfork() was unsuccessful\n");
-	}
-	else
-	{
-		printf("kfork() was successful\n");
-		printf("returning child process %d\n", p->pid);
-	}
-	
-}
 
 do_wake()
 {
-	wakeup(running->pid);
+	wakeup(running->ppid);
 }
 
-do_tswitch()
-{
-	printf("switching to different proccess\n");
-	tswitch();
-	printf("ReadyQueue: "); printQueue(&readyQueue);
-}

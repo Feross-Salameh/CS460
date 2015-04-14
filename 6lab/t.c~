@@ -16,8 +16,8 @@ PIPE pipe[NPIPE];
 /**************************************************
   bio.o, queue.o loader.o are in mtxlib
 **************************************************/
-#include "wait.c"
-#include "kernel.c"
+//#include "wait.c"
+//#include "kernel.c"
 #include "int.c"
 #include "forkexec.c"
 #include "pipe.c"
