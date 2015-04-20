@@ -20,7 +20,7 @@ int fork()
 
   segment = (p->pid+1)*0x1000;
   copyImage(segment);
-
+  p->kstack[SSIZE-1] = (int)goUmode;
   	for (i=1; i<=12; i++){         // write 0's to ALL of them
 		 put_word(0, segment, -2*i);
 	 }

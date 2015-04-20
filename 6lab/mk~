@@ -2,7 +2,7 @@ VFD=mtximage   # change VFD to YOUR virtual fd
 
 as86 -o ts.o ts.s
 bcc  -c -ansi t.c
-ld86 -d -o mtx ts.o t.o mtxlib /usr/lib/bcc/libc.a 
+ld86 -d -o mtx ts.o t.o mtxlib /usr/lib/bcc/libc.a
 
 echo cp mtx to $VFD/boot/
 mount -o loop $VFD /mnt
