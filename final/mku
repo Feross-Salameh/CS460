@@ -6,6 +6,8 @@ if [ $# \< 1 ]; then echo Usage: mku filename; exit; fi
 PARTITION=1
 if [ $# \> 1 ]; then PARTITION=$2; fi
 
+cp vdisk134 vdisk
+
 VDISK=vdisk
 SECTOR=$(./ptable vdisk $PARTITION)
 OFFSET=$(expr $SECTOR \* 512)
