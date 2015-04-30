@@ -6,7 +6,7 @@ if [ $# \< 1 ]; then echo Usage: mku filename; exit; fi
 PARTITION=1
 if [ $# \> 1 ]; then PARTITION=$2; fi
 
-cp vdisk134 vdisk
+cp vdiskcpy vdisk
 
 VDISK=vdisk
 SECTOR=$(./ptable vdisk $PARTITION)
@@ -29,4 +29,6 @@ echo copying $1 into $VDISK/bin/$1
 cp -av a.out /mnt/bin/$1
 umount /mnt
 
+echo rm all .o files
+rm *.o
 echo done $1
